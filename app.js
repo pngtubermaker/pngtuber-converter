@@ -14,8 +14,14 @@
     blink: 'Blink',
     blinkTalking: 'Blink + talking',
   };
-  /** The free characters live on the OBS player's site, same origin. */
-  var SAMPLES = '../pngtuber-obs-player/';
+  /**
+   * The free characters live on the OBS player's site: same origin on
+   * GitHub Pages and in local development, and by absolute URL anywhere
+   * else (an itch.io embed). GitHub Pages sends Access-Control-Allow-Origin.
+   */
+  var SAMPLES = /(^|\.)github\.io$|^(127\.0\.0\.1|localhost)$/.test(location.hostname)
+    ? '../pngtuber-obs-player/'
+    : 'https://pngtubermaker.github.io/pngtuber-obs-player/';
   var MAX_SIDE = 1024;
 
   var frames = {}; // role -> { image, url, width, height }
@@ -44,6 +50,8 @@
 
   function loadImage(src) {
     var image = new Image();
+    // Cross-origin samples must not taint the canvas the PNGs are drawn on.
+    image.crossOrigin = 'anonymous';
     image.src = src;
     return image.decode().then(function () {
       return {
